@@ -35,7 +35,7 @@ export default function App() {
     <main className="page-shell">
       <div className="hero">
         <p className="hero__eyebrow">Apple Pay Device Check</p>
-        <h1>See whether this browser looks ready for Apple Pay.</h1>
+        <h1>Check whether this browser is ready for Apple Pay.</h1>
         <p className="hero__copy">
           This page inspects the current browser environment and reports the Apple Pay and payment
           API signals that are available to your JavaScript runtime.
