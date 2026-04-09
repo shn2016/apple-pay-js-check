@@ -13,6 +13,8 @@ const DEFAULT_REPORT = {
   isSafariOnMac: false,
   hasApplePaySession: false,
   hasPaymentRequest: false,
+  applePayAvailableWithQrCode: false,
+  applePayAvailableWithoutQrCode: false,
   userAgent: '',
 };
 
@@ -42,16 +44,28 @@ function detectAppleDevice(userAgent, platform, touchPoints) {
   return { appleDevice, isIPhone, isIPad, isMac };
 }
 
+function isMobileDevice(userAgent, isIPhone, isIPad) {
+  return isIPhone || isIPad || /Android|Mobile/i.test(userAgent);
+}
+
+function isSafariBrowser(userAgent) {
+  return /Safari/i.test(userAgent) && !/Chrome|CriOS|Edg|OPR|Firefox|FxiOS/i.test(userAgent);
+}
+
 function getApplePaySupport() {
   const hasApplePaySession = 'ApplePaySession' in window;
+  const hasPaymentRequest = 'PaymentRequest' in window;
 
-  if (!hasApplePaySession) {
+  if (!hasPaymentRequest || !hasApplePaySession) {
     return {
       hasApplePaySession,
+      hasPaymentRequest,
+      isApplePaySupported: false,
       applePaySupport: {
         label: 'No',
         tone: 'danger',
-        hint: 'Defined as unavailable because window.ApplePaySession is missing in this browser',
+        hint:
+          'Defined as unavailable because PaymentRequest or ApplePaySession is missing in this browser',
       },
     };
   }
@@ -59,6 +73,8 @@ function getApplePaySupport() {
   if (!window.isSecureContext) {
     return {
       hasApplePaySession,
+      hasPaymentRequest,
+      isApplePaySupported: false,
       applePaySupport: {
         label: 'Insecure',
         tone: 'warning',
@@ -71,6 +87,8 @@ function getApplePaySupport() {
   if (typeof window.ApplePaySession.canMakePayments !== 'function') {
     return {
       hasApplePaySession,
+      hasPaymentRequest,
+      isApplePaySupported: false,
       applePaySupport: {
         label: 'Unknown',
         tone: 'info',
@@ -85,11 +103,13 @@ function getApplePaySupport() {
 
     return {
       hasApplePaySession,
+      hasPaymentRequest,
+      isApplePaySupported: Boolean(canMakePayments),
       applePaySupport: {
         label: canMakePayments ? 'Yes' : 'No',
         tone: canMakePayments ? 'success' : 'danger',
         hint:
-          'Defined by window.ApplePaySession existing and ApplePaySession.canMakePayments() returning true',
+          'Defined by PaymentRequest and ApplePaySession existing, plus ApplePaySession.canMakePayments() returning true',
       },
     };
   } catch (error) {
@@ -101,6 +121,8 @@ function getApplePaySupport() {
     if (isInsecureDocumentError) {
       return {
         hasApplePaySession,
+        hasPaymentRequest,
+        isApplePaySupported: false,
         applePaySupport: {
           label: 'Insecure',
           tone: 'warning',
@@ -112,6 +134,8 @@ function getApplePaySupport() {
 
     return {
       hasApplePaySession,
+      hasPaymentRequest,
+      isApplePaySupported: false,
       applePaySupport: {
         label: 'Error',
         tone: 'danger',
@@ -119,6 +143,24 @@ function getApplePaySupport() {
       },
     };
   }
+}
+
+function getApplePayAvailability({
+  enableQrCode,
+  isMobile,
+  isAppleMobile,
+  isSafariOnMac,
+  isApplePaySupported,
+}) {
+  if (isMobile) {
+    return isAppleMobile && isApplePaySupported;
+  }
+
+  if (enableQrCode) {
+    return isApplePaySupported;
+  }
+
+  return isSafariOnMac && isApplePaySupported;
 }
 
 export function getEnvironmentReport() {
@@ -134,20 +176,37 @@ export function getEnvironmentReport() {
     platform,
     touchPoints,
   );
-
-  const isMobile = isIPhone || isIPad || /Android|Mobile/i.test(userAgent);
-  const isSafari =
-    /Safari/i.test(userAgent) && !/Chrome|CriOS|Edg|OPR|Firefox|FxiOS/i.test(userAgent);
-  const { hasApplePaySession, applePaySupport } = getApplePaySupport();
+  const isMobile = isMobileDevice(userAgent, isIPhone, isIPad);
+  const isSafari = isSafariBrowser(userAgent);
+  const isAppleMobile = isIPhone || isIPad;
+  const { hasApplePaySession, hasPaymentRequest, isApplePaySupported, applePaySupport } =
+    getApplePaySupport();
+  const safariOnMac = isSafari && isMac;
+  const applePayAvailableWithQrCode = getApplePayAvailability({
+    enableQrCode: true,
+    isMobile,
+    isAppleMobile,
+    isSafariOnMac: safariOnMac,
+    isApplePaySupported,
+  });
+  const applePayAvailableWithoutQrCode = getApplePayAvailability({
+    enableQrCode: false,
+    isMobile,
+    isAppleMobile,
+    isSafariOnMac: safariOnMac,
+    isApplePaySupported,
+  });
 
   return {
     formFactor: isMobile ? 'Mobile' : 'Desktop',
     appleDevice,
     applePaySdkStatus: getApplePaySdkStatus(),
     applePaySupport,
-    isSafariOnMac: isSafari && isMac,
+    isSafariOnMac: safariOnMac,
     hasApplePaySession,
-    hasPaymentRequest: 'PaymentRequest' in window,
+    hasPaymentRequest,
+    applePayAvailableWithQrCode,
+    applePayAvailableWithoutQrCode,
     userAgent,
   };
 }

@@ -22,6 +22,8 @@ export default function App() {
 
   const {
     appleDevice,
+    applePayAvailableWithQrCode,
+    applePayAvailableWithoutQrCode,
     applePaySdkStatus,
     applePaySupport,
     formFactor,
@@ -45,6 +47,18 @@ export default function App() {
       <section className="status-grid" aria-label="Environment checks">
         <StatusCard label="View Type" value={formFactor} tone="info" />
         <StatusCard label="Apple Device" value={appleDevice} tone="info" />
+        <StatusCard
+          label="isApplePayAvailable(true)"
+          value={applePayAvailableWithQrCode ? 'Yes' : 'No'}
+          tone={applePayAvailableWithQrCode ? 'success' : 'danger'}
+          hint="Mobile: Apple mobile device and Apple Pay supported. Desktop with QR enabled: Apple Pay support only."
+        />
+        <StatusCard
+          label="isApplePayAvailable(false)"
+          value={applePayAvailableWithoutQrCode ? 'Yes' : 'No'}
+          tone={applePayAvailableWithoutQrCode ? 'success' : 'danger'}
+          hint="Mobile: Apple mobile device and Apple Pay supported. Desktop without QR: Safari on Mac and Apple Pay supported."
+        />
         <StatusCard
           label="Apple Pay SDK"
           value={applePaySdkStatus.label}
