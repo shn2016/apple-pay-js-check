@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import StatusCard from './components/StatusCard';
 import { getEnvironmentReport } from './utils/applePayEnvironment';
 
 export default function App() {
@@ -21,17 +20,67 @@ export default function App() {
   }, []);
 
   const {
-    appleDevice,
     applePayAvailableWithQrCode,
     applePayAvailableWithoutQrCode,
     applePaySdkStatus,
     applePaySupport,
-    formFactor,
+    canMakePaymentsResult,
     hasApplePaySession,
     hasPaymentRequest,
     isSafariOnMac,
     userAgent,
   } = environmentReport;
+
+  const rows = [
+    {
+      label: 'isApplePayAvailable(true)',
+      value: applePayAvailableWithQrCode ? 'Yes' : 'No',
+      tone: applePayAvailableWithQrCode ? 'success' : 'danger',
+      hint: 'Mobile: Apple mobile device and Apple Pay supported. Desktop with QR enabled: Apple Pay support only.',
+    },
+    {
+      label: 'isApplePayAvailable(false)',
+      value: applePayAvailableWithoutQrCode ? 'Yes' : 'No',
+      tone: applePayAvailableWithoutQrCode ? 'success' : 'danger',
+      hint: 'Mobile: Apple mobile device and Apple Pay supported. Desktop without QR: Safari on Mac and Apple Pay supported.',
+    },
+    {
+      label: 'Apple Pay SDK',
+      value: applePaySdkStatus.label,
+      tone: applePaySdkStatus.tone,
+      hint: 'Tracks whether apple-pay-sdk.js finished loading.',
+    },
+    {
+      label: 'Apple Pay Supported',
+      value: applePaySupport.label,
+      tone: applePaySupport.tone,
+      hint: applePaySupport.hint,
+    },
+    {
+      label: 'canMakePayments()',
+      value: canMakePaymentsResult,
+      tone: canMakePaymentsResult === 'true' ? 'success' : canMakePaymentsResult === 'false' ? 'danger' : 'info',
+      hint: 'Raw ApplePaySession.canMakePayments() result shown as true, false, or undefined.',
+    },
+    {
+      label: 'PaymentRequest Available',
+      value: hasPaymentRequest ? 'Yes' : 'No',
+      tone: hasPaymentRequest ? 'success' : 'danger',
+      hint: 'Checks whether window.PaymentRequest exists.',
+    },
+    {
+      label: 'Safari on macOS',
+      value: isSafariOnMac ? 'Yes' : 'No',
+      tone: isSafariOnMac ? 'success' : 'danger',
+      hint: 'User-agent based Safari and macOS detection.',
+    },
+    {
+      label: 'ApplePaySession Present',
+      value: hasApplePaySession ? 'Yes' : 'No',
+      tone: hasApplePaySession ? 'success' : 'danger',
+      hint: 'Checks whether window.ApplePaySession exists.',
+    },
+  ];
 
   return (
     <main className="page-shell">
@@ -44,49 +93,30 @@ export default function App() {
         </p>
       </div>
 
-      <section className="status-grid" aria-label="Environment checks">
-        <StatusCard label="View Type" value={formFactor} tone="info" />
-        <StatusCard label="Apple Device" value={appleDevice} tone="info" />
-        <StatusCard
-          label="isApplePayAvailable(true)"
-          value={applePayAvailableWithQrCode ? 'Yes' : 'No'}
-          tone={applePayAvailableWithQrCode ? 'success' : 'danger'}
-          hint="Mobile: Apple mobile device and Apple Pay supported. Desktop with QR enabled: Apple Pay support only."
-        />
-        <StatusCard
-          label="isApplePayAvailable(false)"
-          value={applePayAvailableWithoutQrCode ? 'Yes' : 'No'}
-          tone={applePayAvailableWithoutQrCode ? 'success' : 'danger'}
-          hint="Mobile: Apple mobile device and Apple Pay supported. Desktop without QR: Safari on Mac and Apple Pay supported."
-        />
-        <StatusCard
-          label="Apple Pay SDK"
-          value={applePaySdkStatus.label}
-          tone={applePaySdkStatus.tone}
-          hint="Tracks whether apple-pay-sdk.js finished loading"
-        />
-        <StatusCard
-          label="Apple Pay Supported"
-          value={applePaySupport.label}
-          tone={applePaySupport.tone}
-          hint={applePaySupport.hint}
-        />
-        <StatusCard
-          label="PaymentRequest Available"
-          value={hasPaymentRequest ? 'Yes' : 'No'}
-          tone={hasPaymentRequest ? 'success' : 'danger'}
-          hint="Checks whether window.PaymentRequest exists"
-        />
-        <StatusCard
-          label="Safari on macOS"
-          value={isSafariOnMac ? 'Yes' : 'No'}
-          tone={isSafariOnMac ? 'success' : 'danger'}
-        />
-        <StatusCard
-          label="ApplePaySession Present"
-          value={hasApplePaySession ? 'Yes' : 'No'}
-          tone={hasApplePaySession ? 'success' : 'danger'}
-        />
+      <section className="details-panel" aria-label="Environment checks">
+        <h2>Checks</h2>
+        <div className="table-wrap">
+          <table className="diagnostics-table">
+            <thead>
+              <tr>
+                <th scope="col">Check</th>
+                <th scope="col">Value</th>
+                <th scope="col">Definition</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.label}>
+                  <th scope="row">{row.label}</th>
+                  <td>
+                    <span className={`status-pill status-pill--${row.tone}`}>{row.value}</span>
+                  </td>
+                  <td>{row.hint}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="details-panel">

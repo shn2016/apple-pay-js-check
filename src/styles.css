@@ -57,57 +57,6 @@ body {
   line-height: 1.6;
 }
 
-.status-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.status-card {
-  padding: 20px;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(8, 17, 32, 0.68);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
-}
-
-.status-card--success {
-  background: linear-gradient(180deg, rgba(17, 77, 52, 0.85), rgba(7, 34, 23, 0.88));
-}
-
-.status-card--danger {
-  background: linear-gradient(180deg, rgba(110, 30, 46, 0.88), rgba(48, 13, 20, 0.92));
-}
-
-.status-card--warning {
-  background: linear-gradient(180deg, rgba(128, 88, 18, 0.9), rgba(71, 45, 7, 0.94));
-}
-
-.status-card--info {
-  background: linear-gradient(180deg, rgba(18, 58, 102, 0.88), rgba(10, 28, 52, 0.92));
-}
-
-.status-card__label {
-  margin: 0 0 12px;
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(245, 247, 251, 0.68);
-}
-
-.status-card__value {
-  margin: 0;
-  font-size: clamp(1.5rem, 3vw, 2.35rem);
-  font-weight: 600;
-}
-
-.status-card__hint {
-  margin: 10px 0 0;
-  color: rgba(245, 247, 251, 0.76);
-  line-height: 1.45;
-}
-
 .details-panel {
   margin-top: 24px;
   padding: 24px;
@@ -125,6 +74,78 @@ body {
   margin: 0 0 16px;
   color: #d3ddf0;
   line-height: 1.6;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.diagnostics-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #eef4ff;
+}
+
+.diagnostics-table th,
+.diagnostics-table td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.diagnostics-table thead th {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(245, 247, 251, 0.64);
+}
+
+.diagnostics-table tbody th {
+  width: 24%;
+  min-width: 180px;
+  font-weight: 600;
+}
+
+.diagnostics-table tbody td:nth-child(2) {
+  width: 18%;
+  min-width: 140px;
+}
+
+.diagnostics-table tbody tr:last-child th,
+.diagnostics-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-width: 88px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  justify-content: center;
+}
+
+.status-pill--success {
+  background: rgba(29, 122, 81, 0.28);
+  color: #93f0c0;
+}
+
+.status-pill--danger {
+  background: rgba(151, 50, 72, 0.28);
+  color: #ffb1c0;
+}
+
+.status-pill--warning {
+  background: rgba(149, 103, 27, 0.3);
+  color: #ffd28c;
+}
+
+.status-pill--info {
+  background: rgba(44, 104, 191, 0.28);
+  color: #b9d5ff;
 }
 
 .details-panel--error {
@@ -150,8 +171,31 @@ body {
     padding-top: 28px;
   }
 
-  .status-card {
-    border-radius: 20px;
+  .diagnostics-table th,
+  .diagnostics-table td {
+    padding: 12px;
+  }
+
+  .diagnostics-table tbody th,
+  .diagnostics-table tbody td {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .diagnostics-table tbody tr {
+    display: block;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .diagnostics-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .diagnostics-table tbody tr:last-child th,
+  .diagnostics-table tbody tr:last-child td {
+    border-bottom: 0;
   }
 
   .details-panel {

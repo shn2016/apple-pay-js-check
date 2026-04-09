@@ -1,6 +1,4 @@
 const DEFAULT_REPORT = {
-  formFactor: 'Desktop',
-  appleDevice: 'Other',
   applePaySdkStatus: {
     label: 'Unavailable',
     tone: 'danger',
@@ -13,6 +11,7 @@ const DEFAULT_REPORT = {
   isSafariOnMac: false,
   hasApplePaySession: false,
   hasPaymentRequest: false,
+  canMakePaymentsResult: 'undefined',
   applePayAvailableWithQrCode: false,
   applePayAvailableWithoutQrCode: false,
   userAgent: '',
@@ -61,6 +60,7 @@ function getApplePaySupport() {
       hasApplePaySession,
       hasPaymentRequest,
       isApplePaySupported: false,
+      canMakePaymentsResult: 'undefined',
       applePaySupport: {
         label: 'No',
         tone: 'danger',
@@ -75,6 +75,7 @@ function getApplePaySupport() {
       hasApplePaySession,
       hasPaymentRequest,
       isApplePaySupported: false,
+      canMakePaymentsResult: 'undefined',
       applePaySupport: {
         label: 'Insecure',
         tone: 'warning',
@@ -89,6 +90,7 @@ function getApplePaySupport() {
       hasApplePaySession,
       hasPaymentRequest,
       isApplePaySupported: false,
+      canMakePaymentsResult: 'undefined',
       applePaySupport: {
         label: 'Unknown',
         tone: 'info',
@@ -105,6 +107,7 @@ function getApplePaySupport() {
       hasApplePaySession,
       hasPaymentRequest,
       isApplePaySupported: Boolean(canMakePayments),
+      canMakePaymentsResult: String(canMakePayments),
       applePaySupport: {
         label: canMakePayments ? 'Yes' : 'No',
         tone: canMakePayments ? 'success' : 'danger',
@@ -123,6 +126,7 @@ function getApplePaySupport() {
         hasApplePaySession,
         hasPaymentRequest,
         isApplePaySupported: false,
+        canMakePaymentsResult: 'undefined',
         applePaySupport: {
           label: 'Insecure',
           tone: 'warning',
@@ -136,6 +140,7 @@ function getApplePaySupport() {
       hasApplePaySession,
       hasPaymentRequest,
       isApplePaySupported: false,
+      canMakePaymentsResult: 'undefined',
       applePaySupport: {
         label: 'Error',
         tone: 'danger',
@@ -171,16 +176,17 @@ export function getEnvironmentReport() {
   const userAgent = navigator.userAgent;
   const platform = navigator.platform || '';
   const touchPoints = navigator.maxTouchPoints || 0;
-  const { appleDevice, isIPhone, isIPad, isMac } = detectAppleDevice(
-    userAgent,
-    platform,
-    touchPoints,
-  );
+  const { isIPhone, isIPad, isMac } = detectAppleDevice(userAgent, platform, touchPoints);
   const isMobile = isMobileDevice(userAgent, isIPhone, isIPad);
   const isSafari = isSafariBrowser(userAgent);
   const isAppleMobile = isIPhone || isIPad;
-  const { hasApplePaySession, hasPaymentRequest, isApplePaySupported, applePaySupport } =
-    getApplePaySupport();
+  const {
+    hasApplePaySession,
+    hasPaymentRequest,
+    isApplePaySupported,
+    canMakePaymentsResult,
+    applePaySupport,
+  } = getApplePaySupport();
   const safariOnMac = isSafari && isMac;
   const applePayAvailableWithQrCode = getApplePayAvailability({
     enableQrCode: true,
@@ -198,13 +204,12 @@ export function getEnvironmentReport() {
   });
 
   return {
-    formFactor: isMobile ? 'Mobile' : 'Desktop',
-    appleDevice,
     applePaySdkStatus: getApplePaySdkStatus(),
     applePaySupport,
     isSafariOnMac: safariOnMac,
     hasApplePaySession,
     hasPaymentRequest,
+    canMakePaymentsResult,
     applePayAvailableWithQrCode,
     applePayAvailableWithoutQrCode,
     userAgent,
