@@ -17,14 +17,67 @@ const DEFAULT_REPORT = {
   userAgent: '',
 };
 
+const APPLE_PAY_SDK_ID = 'apple-pay-sdk';
+const APPLE_PAY_SDK_SRC = 'https://applepay.cdn-apple.com/jsapi/1.latest/apple-pay-sdk.js';
+const APPLE_PAY_SDK_EVENT = 'apple-pay-sdk-statuschange';
+
+function setApplePaySdkStatus(status) {
+  window.__applePaySdkStatus = status;
+  window.dispatchEvent(new CustomEvent(APPLE_PAY_SDK_EVENT, { detail: status }));
+}
+
+export function ensureApplePaySdkLoaded() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
+
+  if ('ApplePaySession' in window) {
+    setApplePaySdkStatus('loaded');
+    return;
+  }
+
+  const existingScript = document.getElementById(APPLE_PAY_SDK_ID);
+  if (existingScript) {
+    return;
+  }
+
+  const handleWindowError = (event) => {
+    const filename = event.filename || '';
+    if (filename.includes('apple-pay-sdk.js')) {
+      setApplePaySdkStatus('failed');
+      window.removeEventListener('error', handleWindowError);
+    }
+  };
+
+  window.addEventListener('error', handleWindowError);
+  setApplePaySdkStatus('loading');
+
+  const script = document.createElement('script');
+  script.id = APPLE_PAY_SDK_ID;
+  script.src = APPLE_PAY_SDK_SRC;
+  script.crossOrigin = 'anonymous';
+  script.async = true;
+  script.onload = () => {
+    setApplePaySdkStatus('loaded');
+    window.removeEventListener('error', handleWindowError);
+  };
+  script.onerror = () => {
+    setApplePaySdkStatus('failed');
+    window.removeEventListener('error', handleWindowError);
+  };
+
+  document.head.appendChild(script);
+}
+
 function getApplePaySdkStatus() {
   const sdkStatusMap = {
+    unavailable: { label: 'Unavailable', tone: 'danger' },
     loading: { label: 'Loading', tone: 'info' },
     loaded: { label: 'Loaded', tone: 'success' },
     failed: { label: 'Failed', tone: 'danger' },
   };
 
-  return sdkStatusMap[window.__applePaySdkStatus] || { label: 'Unknown', tone: 'info' };
+  return sdkStatusMap[window.__applePaySdkStatus] || sdkStatusMap.unavailable;
 }
 
 function detectAppleDevice(userAgent, platform, touchPoints) {

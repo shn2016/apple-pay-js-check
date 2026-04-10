@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getEnvironmentReport } from './utils/applePayEnvironment';
+import { ensureApplePaySdkLoaded, getEnvironmentReport } from './utils/applePayEnvironment';
 
 export default function App() {
   const [environmentReport, setEnvironmentReport] = useState(() => getEnvironmentReport());
@@ -9,13 +9,20 @@ export default function App() {
       setEnvironmentReport(getEnvironmentReport());
     };
 
+    const handleSdkStatusChange = () => {
+      refreshEnvironmentReport();
+    };
+
+    ensureApplePaySdkLoaded();
     refreshEnvironmentReport();
     window.addEventListener('resize', refreshEnvironmentReport);
     window.addEventListener('load', refreshEnvironmentReport);
+    window.addEventListener('apple-pay-sdk-statuschange', handleSdkStatusChange);
 
     return () => {
       window.removeEventListener('resize', refreshEnvironmentReport);
       window.removeEventListener('load', refreshEnvironmentReport);
+      window.removeEventListener('apple-pay-sdk-statuschange', handleSdkStatusChange);
     };
   }, []);
 
@@ -48,7 +55,7 @@ export default function App() {
       label: 'Apple Pay SDK',
       value: applePaySdkStatus.label,
       tone: applePaySdkStatus.tone,
-      hint: 'Tracks whether apple-pay-sdk.js finished loading.',
+      hint: 'Loaded at runtime so Apple SDK failures do not block the page from rendering.',
     },
     {
       label: 'Apple Pay Supported',
@@ -107,11 +114,13 @@ export default function App() {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.label}>
-                  <th scope="row">{row.label}</th>
-                  <td>
+                  <th scope="row" data-label="Check">
+                    {row.label}
+                  </th>
+                  <td data-label="Value">
                     <span className={`status-pill status-pill--${row.tone}`}>{row.value}</span>
                   </td>
-                  <td>{row.hint}</td>
+                  <td data-label="Definition">{row.hint}</td>
                 </tr>
               ))}
             </tbody>
